@@ -5,7 +5,7 @@ import {
   setAlert,
 } from '../store'
 import { mintNFT } from '../GarmentNFT'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { FaTimes } from 'react-icons/fa'
 
 const CreateNFT = () => {
@@ -17,6 +17,7 @@ const CreateNFT = () => {
   const [color, setColor] = useState('')
   const [fabric, setFabric] = useState('')
   const [imgBase64, setImgBase64] = useState(null)
+  const [inputKey, setInputKey] = useState(Date.now());
 
   const onChange = async (e) => {
     const reader = new FileReader()
@@ -68,6 +69,9 @@ const CreateNFT = () => {
     setDescription('')
     setColor('')
     setFabric('')
+    setPrice('')
+    setSize('')
+    setInputKey(Date.now())
   }
 
   return (
@@ -106,6 +110,7 @@ const CreateNFT = () => {
             <label className="block">
               <span className="sr-only">Choose profile photo</span>
               <input
+                key={inputKey}
                 type="file"
                 accept="image/png, image/gif, image/jpeg, image/webp"
                 className="block w-full text-sm text-slate-500
