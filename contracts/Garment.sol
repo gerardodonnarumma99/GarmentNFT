@@ -62,7 +62,7 @@ contract Garment is ERC721Enumerable, Ownable {
         string memory image
     ) external payable {
         require(msg.value >= cost, "Ether too low for minting!");
-        require(msg.sender == owner(), "The owner of the marketplace cannot create NFT!");
+        require(msg.sender != owner(), "The owner of the marketplace cannot create NFT!");
         
         payTo(owner(), cost); // Pagamento della commissione al creatore del marketplace
 
@@ -116,10 +116,10 @@ contract Garment is ERC721Enumerable, Ownable {
 
         // Ottieni i dettagli del NFT
         GarmentDetails storage garment = minted[tokenId - 1];
+        // Verifica che il proprietario non può acquistare i propri NFT
+        require(!_isApprovedOrOwner(msg.sender, tokenId), "Operation Not Allowed!");
         // Verifica che il prezzo pagato corrisponda al prezzo dell'indumento
         require(msg.value >= garment.price, "Ether too low for purchase!");
-        // Verifica che il proprietario non può acquistare i propri NFT
-        require(_isApprovedOrOwner(msg.sender, tokenId), "Operation Not Allowed!");
 
         // Calcola le commissioni per l'artista e il creatore del marketplace
         uint256 artistRoyalty;
@@ -145,7 +145,7 @@ contract Garment is ERC721Enumerable, Ownable {
         garment.owner = msg.sender;
         minted[tokenId - 1] = garment;
         
-        // Emetti l'evento di vendita
+        // Emetto l'evento di vendita
         emit Sale(
             minted[tokenId - 1].id,
             msg.sender,
@@ -161,7 +161,6 @@ contract Garment is ERC721Enumerable, Ownable {
         );
     }
 
-    // changes the price of an NFT
     function changePrice(uint256 id, uint256 newPrice) external returns (bool) {
         require(newPrice > 0 ether, "Ether too low!");
         require(_isApprovedOrOwner(msg.sender, id), "Operation Not Allowed!");
@@ -170,12 +169,10 @@ contract Garment is ERC721Enumerable, Ownable {
         return true;
     }
 
-    // returns all minted NFTs
     function getAllNFTs() external view returns (GarmentDetails[] memory) {
         return minted;
     }
 
-    // returns a specific NFT by token id
     function getNFT(uint256 id) external view returns (GarmentDetails memory) {
         return minted[id - 1];
     }
@@ -200,15 +197,14 @@ contract Garment is ERC721Enumerable, Ownable {
         return garments;
     }
 
-    function getTokenIdsByOwner(address owner) private view returns (uint256[] memory) {
-        uint256 tokenCount = balanceOf(owner);
+    function getTokenIdsByOwner(address ownerNft) private view returns (uint256[] memory) {
+        uint256 tokenCount = balanceOf(ownerNft);
         uint256[] memory tokenIds = new uint256[](tokenCount);
         
         for (uint256 i = 0; i < tokenCount; i++) {
-            tokenIds[i] = tokenOfOwnerByIndex(owner, i);
+            tokenIds[i] = tokenOfOwnerByIndex(ownerNft, i);
         }
         
         return tokenIds;
     }
-    
 }
